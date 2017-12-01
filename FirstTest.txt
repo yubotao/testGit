@@ -5,3 +5,5 @@ ah~ this is the second try.
 third try by master£¬and can not see dev's change.
 
 this is in test
+
+I have a bug branch test in master branch.
