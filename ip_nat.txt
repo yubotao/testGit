@@ -1,0 +1,370 @@
+Chain PREROUTING (policy ACCEPT)
+target     prot opt source               destination         
+KUBE-SERVICES  all  --  0.0.0.0/0            0.0.0.0/0            /* kubernetes service portals */
+
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination         
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination         
+KUBE-SERVICES  all  --  0.0.0.0/0            0.0.0.0/0            /* kubernetes service portals */
+
+Chain POSTROUTING (policy ACCEPT)
+target     prot opt source               destination         
+KUBE-POSTROUTING  all  --  0.0.0.0/0            0.0.0.0/0            /* kubernetes postrouting rules */
+RETURN     all  --  172.20.0.0/16        172.20.0.0/16       
+MASQUERADE  all  --  172.20.0.0/16       !224.0.0.0/4         
+RETURN     all  -- !172.20.0.0/16        172.20.3.0/24       
+MASQUERADE  all  -- !172.20.0.0/16        172.20.0.0/16       
+
+Chain KUBE-FW-H6NYULRVXVRKXOWD (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-ingress:https loadbalancer IP */
+KUBE-SVC-H6NYULRVXVRKXOWD  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-ingress:https loadbalancer IP */
+KUBE-MARK-DROP  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-ingress:https loadbalancer IP */
+
+Chain KUBE-FW-J4ENLV444DNEMLR3 (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/nginx-ingress-lb:https loadbalancer IP */
+KUBE-SVC-J4ENLV444DNEMLR3  all  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/nginx-ingress-lb:https loadbalancer IP */
+KUBE-MARK-DROP  all  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/nginx-ingress-lb:https loadbalancer IP */
+
+Chain KUBE-FW-JSIH6CCNAROIS6ON (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-ingress:http loadbalancer IP */
+KUBE-SVC-JSIH6CCNAROIS6ON  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-ingress:http loadbalancer IP */
+KUBE-MARK-DROP  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-ingress:http loadbalancer IP */
+
+Chain KUBE-FW-KCMUPQBA6BMT5PWB (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/nginx-ingress-lb:http loadbalancer IP */
+KUBE-SVC-KCMUPQBA6BMT5PWB  all  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/nginx-ingress-lb:http loadbalancer IP */
+KUBE-MARK-DROP  all  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/nginx-ingress-lb:http loadbalancer IP */
+
+Chain KUBE-MARK-DROP (4 references)
+target     prot opt source               destination         
+MARK       all  --  0.0.0.0/0            0.0.0.0/0            MARK or 0x8000
+
+Chain KUBE-MARK-MASQ (62 references)
+target     prot opt source               destination         
+MARK       all  --  0.0.0.0/0            0.0.0.0/0            MARK or 0x4000
+
+Chain KUBE-NODEPORTS (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  tcp  --  0.0.0.0/0            0.0.0.0/0            /* default/rds-test:http */ tcp dpt:30848
+KUBE-SVC-HIP63BWMDP52BYFQ  tcp  --  0.0.0.0/0            0.0.0.0/0            /* default/rds-test:http */ tcp dpt:30848
+KUBE-MARK-MASQ  tcp  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/zipkin:http */ tcp dpt:30011
+KUBE-SVC-UBK3RQ57NJWVL3NK  tcp  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/zipkin:http */ tcp dpt:30011
+KUBE-MARK-MASQ  tcp  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/nginx-ingress-lb:http */ tcp dpt:32598
+KUBE-SVC-KCMUPQBA6BMT5PWB  tcp  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/nginx-ingress-lb:http */ tcp dpt:32598
+KUBE-MARK-MASQ  tcp  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-ingress:https */ tcp dpt:32189
+KUBE-SVC-H6NYULRVXVRKXOWD  tcp  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-ingress:https */ tcp dpt:32189
+KUBE-MARK-MASQ  tcp  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/nginx-ingress-lb:https */ tcp dpt:32683
+KUBE-SVC-J4ENLV444DNEMLR3  tcp  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/nginx-ingress-lb:https */ tcp dpt:32683
+
+Chain KUBE-POSTROUTING (1 references)
+target     prot opt source               destination         
+MASQUERADE  all  --  0.0.0.0/0            0.0.0.0/0            /* kubernetes service traffic requiring SNAT */ mark match 0x4000/0x4000
+
+Chain KUBE-SEP-5OLZQYS5HJQRPWOD (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.70          0.0.0.0/0            /* istio-system/istio-pilot:http-discovery */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-pilot:http-discovery */ tcp to:172.20.3.70:15003
+
+Chain KUBE-SEP-5RLIUDQS747HWLCQ (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.70          0.0.0.0/0            /* istio-system/istio-pilot:admission-webhook */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-pilot:admission-webhook */ tcp to:172.20.3.70:443
+
+Chain KUBE-SEP-5UFWI47Z52YR5M3U (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.146         0.0.0.0/0            /* kube-system/monitoring-influxdb: */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/monitoring-influxdb: */ tcp to:172.20.3.146:8086
+
+Chain KUBE-SEP-6TIHUV4SBOWFDLOO (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.0.3           0.0.0.0/0            /* kube-system/kube-dns:dns-tcp */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/kube-dns:dns-tcp */ tcp to:172.20.0.3:53
+
+Chain KUBE-SEP-AQDJHDWM2GWEUVCM (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.147         0.0.0.0/0            /* kube-system/nginx-ingress-lb:http */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/nginx-ingress-lb:http */ tcp to:172.20.3.147:80
+
+Chain KUBE-SEP-BT5WT3XY32R2FYUX (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.69          0.0.0.0/0            /* istio-system/istio-mixer:tcp-mtls */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-mixer:tcp-mtls */ tcp to:172.20.3.69:15004
+
+Chain KUBE-SEP-DIDGMP4BSSAWUOL4 (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.156         0.0.0.0/0            /* kube-system/default-http-backend: */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/default-http-backend: */ tcp to:172.20.3.156:8080
+
+Chain KUBE-SEP-F3CFQ4JVHDU54VRH (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.69          0.0.0.0/0            /* istio-system/istio-mixer:tcp-plain */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-mixer:tcp-plain */ tcp to:172.20.3.69:9091
+
+Chain KUBE-SEP-G4KKMRNJRLHVZNDV (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.69          0.0.0.0/0            /* istio-system/istio-mixer:configapi */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-mixer:configapi */ tcp to:172.20.3.69:9094
+
+Chain KUBE-SEP-G6C7CTV5HQKJVJ6C (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.152         0.0.0.0/0            /* kube-system/tiller-deploy:tiller */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/tiller-deploy:tiller */ tcp to:172.20.3.152:44134
+
+Chain KUBE-SEP-GA2CENLDAWQVVVAA (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.162         0.0.0.0/0            /* kube-system/heapster: */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/heapster: */ tcp to:172.20.3.162:8082
+
+Chain KUBE-SEP-GVVFCBUMVMDQ3JUR (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.71          0.0.0.0/0            /* istio-system/istio-ingress:https */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-ingress:https */ tcp to:172.20.3.71:443
+
+Chain KUBE-SEP-HVF6WK4U7ND5ZXMM (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.147         0.0.0.0/0            /* kube-system/nginx-ingress-lb:https */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/nginx-ingress-lb:https */ tcp to:172.20.3.147:443
+
+Chain KUBE-SEP-JGDVMKMAXUDDX26R (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.78          0.0.0.0/0            /* test-istio/common:http */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* test-istio/common:http */ tcp to:172.20.3.78:8088
+
+Chain KUBE-SEP-KEKELZSBK5SH5DBV (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.70          0.0.0.0/0            /* istio-system/istio-pilot:http-legacy-discovery */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-pilot:http-legacy-discovery */ tcp to:172.20.3.70:8080
+
+Chain KUBE-SEP-NDOTHRO2FFGSU2DJ (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.69          0.0.0.0/0            /* istio-system/istio-mixer:statsd-prom */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-mixer:statsd-prom */ tcp to:172.20.3.69:9102
+
+Chain KUBE-SEP-O5XE3MYKJHOJOKOL (2 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  192.168.0.247        0.0.0.0/0            /* default/kubernetes:https */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* default/kubernetes:https */ recent: SET name: KUBE-SEP-O5XE3MYKJHOJOKOL side: source mask: 255.255.255.255 tcp to:192.168.0.247:6443
+
+Chain KUBE-SEP-O5ZWMIRO67FN6I6R (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.69          0.0.0.0/0            /* istio-system/istio-mixer:http-monitoring */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-mixer:http-monitoring */ tcp to:172.20.3.69:9093
+
+Chain KUBE-SEP-OUCBA34MQUFNN33Z (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.69          0.0.0.0/0            /* istio-system/istio-mixer:prometheus */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-mixer:prometheus */ tcp to:172.20.3.69:42422
+
+Chain KUBE-SEP-QFX43WTBYMQZDJTS (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.79          0.0.0.0/0            /* test-istio/xms:http */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* test-istio/xms:http */ tcp to:172.20.3.79:8090
+
+Chain KUBE-SEP-UBNEKJJSCPH57IRE (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.76          0.0.0.0/0            /* default/rds-test:http */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* default/rds-test:http */ tcp to:172.20.3.76:8848
+
+Chain KUBE-SEP-VQF7Q2EIDMCEUQZK (2 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  192.168.0.249        0.0.0.0/0            /* default/kubernetes:https */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* default/kubernetes:https */ recent: SET name: KUBE-SEP-VQF7Q2EIDMCEUQZK side: source mask: 255.255.255.255 tcp to:192.168.0.249:6443
+
+Chain KUBE-SEP-WN2GMEDK4DGY6FQZ (2 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  192.168.0.248        0.0.0.0/0            /* default/kubernetes:https */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* default/kubernetes:https */ recent: SET name: KUBE-SEP-WN2GMEDK4DGY6FQZ side: source mask: 255.255.255.255 tcp to:192.168.0.248:6443
+
+Chain KUBE-SEP-WQKJNDAM4UDU2FCE (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.0.3           0.0.0.0/0            /* kube-system/kube-dns:dns */
+DNAT       udp  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/kube-dns:dns */ udp to:172.20.0.3:53
+
+Chain KUBE-SEP-X3VYEJEYHBZONPQR (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.70          0.0.0.0/0            /* istio-system/istio-pilot:http-monitoring */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-pilot:http-monitoring */ tcp to:172.20.3.70:9093
+
+Chain KUBE-SEP-Y47VPUZVP42HM54F (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.69          0.0.0.0/0            /* istio-system/istio-mixer:statsd-udp */
+DNAT       udp  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-mixer:statsd-udp */ udp to:172.20.3.69:9125
+
+Chain KUBE-SEP-YXUP4JMAPVIXUZ6A (1 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  all  --  172.20.3.73          0.0.0.0/0            /* istio-system/zipkin:http */
+DNAT       tcp  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/zipkin:http */ tcp to:172.20.3.73:9411
+
+Chain KUBE-SERVICES (2 references)
+target     prot opt source               destination         
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.8.113         /* istio-system/istio-pilot:http-legacy-discovery cluster IP */ tcp dpt:8080
+KUBE-SVC-YGLWZMENMIM6GX3O  tcp  --  0.0.0.0/0            172.21.8.113         /* istio-system/istio-pilot:http-legacy-discovery cluster IP */ tcp dpt:8080
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.14.86         /* default/rds-test:http cluster IP */ tcp dpt:8848
+KUBE-SVC-HIP63BWMDP52BYFQ  tcp  --  0.0.0.0/0            172.21.14.86         /* default/rds-test:http cluster IP */ tcp dpt:8848
+KUBE-MARK-MASQ  udp  -- !172.20.0.0/16        172.21.10.115        /* istio-system/istio-mixer:statsd-udp cluster IP */ udp dpt:9125
+KUBE-SVC-KQJDQE4IIXKSNYVI  udp  --  0.0.0.0/0            172.21.10.115        /* istio-system/istio-mixer:statsd-udp cluster IP */ udp dpt:9125
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.4.243         /* kube-system/default-http-backend: cluster IP */ tcp dpt:80
+KUBE-SVC-2QFLXPI3464HMUTA  tcp  --  0.0.0.0/0            172.21.4.243         /* kube-system/default-http-backend: cluster IP */ tcp dpt:80
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.10.115        /* istio-system/istio-mixer:http-monitoring cluster IP */ tcp dpt:9093
+KUBE-SVC-QJCBPOHILFGTGHVW  tcp  --  0.0.0.0/0            172.21.10.115        /* istio-system/istio-mixer:http-monitoring cluster IP */ tcp dpt:9093
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.0.10          /* kube-system/kube-dns:dns-tcp cluster IP */ tcp dpt:53
+KUBE-SVC-ERIFXISQEP7F7OF4  tcp  --  0.0.0.0/0            172.21.0.10          /* kube-system/kube-dns:dns-tcp cluster IP */ tcp dpt:53
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.10.115        /* istio-system/istio-mixer:tcp-plain cluster IP */ tcp dpt:9091
+KUBE-SVC-Q6OTVVUL7FE56QEA  tcp  --  0.0.0.0/0            172.21.10.115        /* istio-system/istio-mixer:tcp-plain cluster IP */ tcp dpt:9091
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.3.152         /* istio-system/zipkin:http cluster IP */ tcp dpt:9411
+KUBE-SVC-UBK3RQ57NJWVL3NK  tcp  --  0.0.0.0/0            172.21.3.152         /* istio-system/zipkin:http cluster IP */ tcp dpt:9411
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.5.190         /* kube-system/monitoring-influxdb: cluster IP */ tcp dpt:8086
+KUBE-SVC-Q6XJQ2I55QTBQCWT  tcp  --  0.0.0.0/0            172.21.5.190         /* kube-system/monitoring-influxdb: cluster IP */ tcp dpt:8086
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.11.62         /* kube-system/tiller-deploy:tiller cluster IP */ tcp dpt:44134
+KUBE-SVC-K7J76NXP7AUZVFGS  tcp  --  0.0.0.0/0            172.21.11.62         /* kube-system/tiller-deploy:tiller cluster IP */ tcp dpt:44134
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.9.242         /* test-istio/xms:http cluster IP */ tcp dpt:8090
+KUBE-SVC-MOBMH4QR763EXQZD  tcp  --  0.0.0.0/0            172.21.9.242         /* test-istio/xms:http cluster IP */ tcp dpt:8090
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.8.5           /* kube-system/heapster: cluster IP */ tcp dpt:80
+KUBE-SVC-BJM46V3U5RZHCFRZ  tcp  --  0.0.0.0/0            172.21.8.5           /* kube-system/heapster: cluster IP */ tcp dpt:80
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.0.1           /* default/kubernetes:https cluster IP */ tcp dpt:443
+KUBE-SVC-NPX46M4PTMTKRN6Y  tcp  --  0.0.0.0/0            172.21.0.1           /* default/kubernetes:https cluster IP */ tcp dpt:443
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.10.115        /* istio-system/istio-mixer:configapi cluster IP */ tcp dpt:9094
+KUBE-SVC-R3TLE4XWN23KHQBT  tcp  --  0.0.0.0/0            172.21.10.115        /* istio-system/istio-mixer:configapi cluster IP */ tcp dpt:9094
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.10.115        /* istio-system/istio-mixer:statsd-prom cluster IP */ tcp dpt:9102
+KUBE-SVC-IND5MKOKZ62EYSON  tcp  --  0.0.0.0/0            172.21.10.115        /* istio-system/istio-mixer:statsd-prom cluster IP */ tcp dpt:9102
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.10.115        /* istio-system/istio-mixer:tcp-mtls cluster IP */ tcp dpt:15004
+KUBE-SVC-AXSWOG3NFHUY73IT  tcp  --  0.0.0.0/0            172.21.10.115        /* istio-system/istio-mixer:tcp-mtls cluster IP */ tcp dpt:15004
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.8.113         /* istio-system/istio-pilot:http-monitoring cluster IP */ tcp dpt:9093
+KUBE-SVC-22SFEYCEMTJRPU4Y  tcp  --  0.0.0.0/0            172.21.8.113         /* istio-system/istio-pilot:http-monitoring cluster IP */ tcp dpt:9093
+KUBE-MARK-MASQ  udp  -- !172.20.0.0/16        172.21.0.10          /* kube-system/kube-dns:dns cluster IP */ udp dpt:53
+KUBE-SVC-TCOU7JCQXEZGVUNU  udp  --  0.0.0.0/0            172.21.0.10          /* kube-system/kube-dns:dns cluster IP */ udp dpt:53
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.8.113         /* istio-system/istio-pilot:admission-webhook cluster IP */ tcp dpt:443
+KUBE-SVC-XTWPVMUEX3BEWZS3  tcp  --  0.0.0.0/0            172.21.8.113         /* istio-system/istio-pilot:admission-webhook cluster IP */ tcp dpt:443
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.9.116         /* kube-system/nginx-ingress-lb:http cluster IP */ tcp dpt:80
+KUBE-SVC-KCMUPQBA6BMT5PWB  tcp  --  0.0.0.0/0            172.21.9.116         /* kube-system/nginx-ingress-lb:http cluster IP */ tcp dpt:80
+KUBE-FW-KCMUPQBA6BMT5PWB  tcp  --  0.0.0.0/0            47.95.49.135         /* kube-system/nginx-ingress-lb:http loadbalancer IP */ tcp dpt:80
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.6.226         /* istio-system/istio-ingress:http cluster IP */ tcp dpt:80
+KUBE-SVC-JSIH6CCNAROIS6ON  tcp  --  0.0.0.0/0            172.21.6.226         /* istio-system/istio-ingress:http cluster IP */ tcp dpt:80
+KUBE-FW-JSIH6CCNAROIS6ON  tcp  --  0.0.0.0/0            47.95.48.214         /* istio-system/istio-ingress:http loadbalancer IP */ tcp dpt:80
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.6.226         /* istio-system/istio-ingress:https cluster IP */ tcp dpt:443
+KUBE-SVC-H6NYULRVXVRKXOWD  tcp  --  0.0.0.0/0            172.21.6.226         /* istio-system/istio-ingress:https cluster IP */ tcp dpt:443
+KUBE-FW-H6NYULRVXVRKXOWD  tcp  --  0.0.0.0/0            47.95.48.214         /* istio-system/istio-ingress:https loadbalancer IP */ tcp dpt:443
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.13.217        /* test-istio/common:http cluster IP */ tcp dpt:8088
+KUBE-SVC-56X47TTUEAMKYSVW  tcp  --  0.0.0.0/0            172.21.13.217        /* test-istio/common:http cluster IP */ tcp dpt:8088
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.10.115        /* istio-system/istio-mixer:prometheus cluster IP */ tcp dpt:42422
+KUBE-SVC-YRICO6SZRCEI5DH4  tcp  --  0.0.0.0/0            172.21.10.115        /* istio-system/istio-mixer:prometheus cluster IP */ tcp dpt:42422
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.8.113         /* istio-system/istio-pilot:http-discovery cluster IP */ tcp dpt:15003
+KUBE-SVC-FOU5W2WBXVVMRXL2  tcp  --  0.0.0.0/0            172.21.8.113         /* istio-system/istio-pilot:http-discovery cluster IP */ tcp dpt:15003
+KUBE-MARK-MASQ  tcp  -- !172.20.0.0/16        172.21.9.116         /* kube-system/nginx-ingress-lb:https cluster IP */ tcp dpt:443
+KUBE-SVC-J4ENLV444DNEMLR3  tcp  --  0.0.0.0/0            172.21.9.116         /* kube-system/nginx-ingress-lb:https cluster IP */ tcp dpt:443
+KUBE-FW-J4ENLV444DNEMLR3  tcp  --  0.0.0.0/0            47.95.49.135         /* kube-system/nginx-ingress-lb:https loadbalancer IP */ tcp dpt:443
+KUBE-NODEPORTS  all  --  0.0.0.0/0            0.0.0.0/0            /* kubernetes service nodeports; NOTE: this must be the last rule in this chain */ ADDRTYPE match dst-type LOCAL
+
+Chain KUBE-SVC-22SFEYCEMTJRPU4Y (1 references)
+target     prot opt source               destination         
+KUBE-SEP-X3VYEJEYHBZONPQR  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-pilot:http-monitoring */
+
+Chain KUBE-SVC-2QFLXPI3464HMUTA (1 references)
+target     prot opt source               destination         
+KUBE-SEP-DIDGMP4BSSAWUOL4  all  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/default-http-backend: */
+
+Chain KUBE-SVC-56X47TTUEAMKYSVW (1 references)
+target     prot opt source               destination         
+KUBE-SEP-JGDVMKMAXUDDX26R  all  --  0.0.0.0/0            0.0.0.0/0            /* test-istio/common:http */
+
+Chain KUBE-SVC-AXSWOG3NFHUY73IT (1 references)
+target     prot opt source               destination         
+KUBE-SEP-BT5WT3XY32R2FYUX  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-mixer:tcp-mtls */
+
+Chain KUBE-SVC-BJM46V3U5RZHCFRZ (1 references)
+target     prot opt source               destination         
+KUBE-SEP-GA2CENLDAWQVVVAA  all  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/heapster: */
+
+Chain KUBE-SVC-ERIFXISQEP7F7OF4 (1 references)
+target     prot opt source               destination         
+KUBE-SEP-6TIHUV4SBOWFDLOO  all  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/kube-dns:dns-tcp */
+
+Chain KUBE-SVC-FOU5W2WBXVVMRXL2 (1 references)
+target     prot opt source               destination         
+KUBE-SEP-5OLZQYS5HJQRPWOD  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-pilot:http-discovery */
+
+Chain KUBE-SVC-H6NYULRVXVRKXOWD (3 references)
+target     prot opt source               destination         
+KUBE-SEP-GVVFCBUMVMDQ3JUR  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-ingress:https */
+
+Chain KUBE-SVC-HIP63BWMDP52BYFQ (2 references)
+target     prot opt source               destination         
+KUBE-SEP-UBNEKJJSCPH57IRE  all  --  0.0.0.0/0            0.0.0.0/0            /* default/rds-test:http */
+
+Chain KUBE-SVC-IND5MKOKZ62EYSON (1 references)
+target     prot opt source               destination         
+KUBE-SEP-NDOTHRO2FFGSU2DJ  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-mixer:statsd-prom */
+
+Chain KUBE-SVC-J4ENLV444DNEMLR3 (3 references)
+target     prot opt source               destination         
+KUBE-SEP-HVF6WK4U7ND5ZXMM  all  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/nginx-ingress-lb:https */
+
+Chain KUBE-SVC-JSIH6CCNAROIS6ON (2 references)
+target     prot opt source               destination         
+
+Chain KUBE-SVC-K7J76NXP7AUZVFGS (1 references)
+target     prot opt source               destination         
+KUBE-SEP-G6C7CTV5HQKJVJ6C  all  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/tiller-deploy:tiller */
+
+Chain KUBE-SVC-KCMUPQBA6BMT5PWB (3 references)
+target     prot opt source               destination         
+KUBE-SEP-AQDJHDWM2GWEUVCM  all  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/nginx-ingress-lb:http */
+
+Chain KUBE-SVC-KQJDQE4IIXKSNYVI (1 references)
+target     prot opt source               destination         
+KUBE-SEP-Y47VPUZVP42HM54F  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-mixer:statsd-udp */
+
+Chain KUBE-SVC-MOBMH4QR763EXQZD (1 references)
+target     prot opt source               destination         
+KUBE-SEP-QFX43WTBYMQZDJTS  all  --  0.0.0.0/0            0.0.0.0/0            /* test-istio/xms:http */
+
+Chain KUBE-SVC-NPX46M4PTMTKRN6Y (1 references)
+target     prot opt source               destination         
+KUBE-SEP-O5XE3MYKJHOJOKOL  all  --  0.0.0.0/0            0.0.0.0/0            /* default/kubernetes:https */ recent: CHECK seconds: 10800 reap name: KUBE-SEP-O5XE3MYKJHOJOKOL side: source mask: 255.255.255.255
+KUBE-SEP-WN2GMEDK4DGY6FQZ  all  --  0.0.0.0/0            0.0.0.0/0            /* default/kubernetes:https */ recent: CHECK seconds: 10800 reap name: KUBE-SEP-WN2GMEDK4DGY6FQZ side: source mask: 255.255.255.255
+KUBE-SEP-VQF7Q2EIDMCEUQZK  all  --  0.0.0.0/0            0.0.0.0/0            /* default/kubernetes:https */ recent: CHECK seconds: 10800 reap name: KUBE-SEP-VQF7Q2EIDMCEUQZK side: source mask: 255.255.255.255
+KUBE-SEP-O5XE3MYKJHOJOKOL  all  --  0.0.0.0/0            0.0.0.0/0            /* default/kubernetes:https */ statistic mode random probability 0.33332999982
+KUBE-SEP-WN2GMEDK4DGY6FQZ  all  --  0.0.0.0/0            0.0.0.0/0            /* default/kubernetes:https */ statistic mode random probability 0.50000000000
+KUBE-SEP-VQF7Q2EIDMCEUQZK  all  --  0.0.0.0/0            0.0.0.0/0            /* default/kubernetes:https */
+
+Chain KUBE-SVC-Q6OTVVUL7FE56QEA (1 references)
+target     prot opt source               destination         
+KUBE-SEP-F3CFQ4JVHDU54VRH  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-mixer:tcp-plain */
+
+Chain KUBE-SVC-Q6XJQ2I55QTBQCWT (1 references)
+target     prot opt source               destination         
+KUBE-SEP-5UFWI47Z52YR5M3U  all  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/monitoring-influxdb: */
+
+Chain KUBE-SVC-QJCBPOHILFGTGHVW (1 references)
+target     prot opt source               destination         
+KUBE-SEP-O5ZWMIRO67FN6I6R  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-mixer:http-monitoring */
+
+Chain KUBE-SVC-R3TLE4XWN23KHQBT (1 references)
+target     prot opt source               destination         
+KUBE-SEP-G4KKMRNJRLHVZNDV  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-mixer:configapi */
+
+Chain KUBE-SVC-TCOU7JCQXEZGVUNU (1 references)
+target     prot opt source               destination         
+KUBE-SEP-WQKJNDAM4UDU2FCE  all  --  0.0.0.0/0            0.0.0.0/0            /* kube-system/kube-dns:dns */
+
+Chain KUBE-SVC-UBK3RQ57NJWVL3NK (2 references)
+target     prot opt source               destination         
+KUBE-SEP-YXUP4JMAPVIXUZ6A  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/zipkin:http */
+
+Chain KUBE-SVC-XTWPVMUEX3BEWZS3 (1 references)
+target     prot opt source               destination         
+KUBE-SEP-5RLIUDQS747HWLCQ  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-pilot:admission-webhook */
+
+Chain KUBE-SVC-YGLWZMENMIM6GX3O (1 references)
+target     prot opt source               destination         
+KUBE-SEP-KEKELZSBK5SH5DBV  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-pilot:http-legacy-discovery */
+
+Chain KUBE-SVC-YRICO6SZRCEI5DH4 (1 references)
+target     prot opt source               destination         
+KUBE-SEP-OUCBA34MQUFNN33Z  all  --  0.0.0.0/0            0.0.0.0/0            /* istio-system/istio-mixer:prometheus */
